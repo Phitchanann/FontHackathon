@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { Card } from '../../components/ui/Card'
 
+// Make sure your image is placed correctly in your public folder
+const USER_BODY_PNG = '/body.png' 
+
 interface KioskStep2Props {
   lang: 'EN' | 'TH'
 }
@@ -23,6 +26,9 @@ type BodyZone = {
   group: ZoneGroup
 }
 
+// --------------------------------------------------------
+// จูนพิกัดใหม่ให้ตรงกับรูป body.jpg 
+// --------------------------------------------------------
 const BODY_ZONES: BodyZone[] = [
   {
     id: 'head',
@@ -30,7 +36,7 @@ const BODY_ZONES: BodyZone[] = [
     labelTH: 'ศีรษะ',
     descriptionEN: 'Headache, migraine, dizziness',
     descriptionTH: 'ปวดศีรษะ ไมเกรน เวียนศีรษะ',
-    top: 12,
+    top: 16,
     left: 50,
     tone: 'danger',
     group: 'head',
@@ -52,7 +58,7 @@ const BODY_ZONES: BodyZone[] = [
     labelTH: 'ช่องท้อง',
     descriptionEN: 'Cramping, nausea, stomach pain',
     descriptionTH: 'ปวดท้อง คลื่นไส้ จุกเสียด',
-    top: 47,
+    top: 45,
     left: 50,
     tone: 'amber',
     group: 'core',
@@ -63,8 +69,8 @@ const BODY_ZONES: BodyZone[] = [
     labelTH: 'แขนซ้าย',
     descriptionEN: 'Numbness, pain, weakness',
     descriptionTH: 'ชา ปวด อ่อนแรง',
-    top: 50,
-    left: 18,
+    top: 44,
+    left: 21,
     tone: 'cyan',
     group: 'arm',
   },
@@ -74,8 +80,8 @@ const BODY_ZONES: BodyZone[] = [
     labelTH: 'แขนขวา',
     descriptionEN: 'Numbness, pain, weakness',
     descriptionTH: 'ชา ปวด อ่อนแรง',
-    top: 50,
-    left: 82,
+    top: 44,
+    left: 79,
     tone: 'cyan',
     group: 'arm',
   },
@@ -85,8 +91,8 @@ const BODY_ZONES: BodyZone[] = [
     labelTH: 'ขาซ้าย',
     descriptionEN: 'Pain, cramping, swelling, weakness',
     descriptionTH: 'ปวด ตะคริว บวม หรืออ่อนแรง',
-    top: 80,
-    left: 43,
+    top: 72,
+    left: 41,
     tone: 'emerald',
     group: 'leg',
   },
@@ -96,8 +102,8 @@ const BODY_ZONES: BodyZone[] = [
     labelTH: 'ขาขวา',
     descriptionEN: 'Pain, cramping, swelling, weakness',
     descriptionTH: 'ปวด ตะคริว บวม หรืออ่อนแรง',
-    top: 80,
-    left: 57,
+    top: 72,
+    left: 59,
     tone: 'emerald',
     group: 'leg',
   },
@@ -258,56 +264,27 @@ export default function KioskStep2Symptoms({ lang }: KioskStep2Props) {
               </div>
 
               <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr),240px]">
-                <div className="relative overflow-hidden rounded-[32px] border border-[#dbe5f3] bg-gradient-to-b from-[#f8fbff] via-white to-[#eef4ff] px-8 py-8">
-                  <div className="absolute left-1/2 top-10 h-28 w-64 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
-                  <div
-                    className="absolute inset-0 opacity-50"
-                    style={{
-                      backgroundImage:
-                        'linear-gradient(rgba(214,227,255,0.45) 1px, transparent 1px), linear-gradient(90deg, rgba(214,227,255,0.45) 1px, transparent 1px)',
-                      backgroundSize: '34px 34px',
-                    }}
-                  />
-
+                <div className="relative overflow-hidden rounded-[32px] border border-[#dbe5f3] bg-white px-8 py-8">
                   <div className="relative flex items-center justify-center py-4">
-                    <div className="relative h-[470px] w-[320px]">
+                    {/* ปรับแก้ Container ให้เป็น w-[280px] h-[480px] จะพอดีกับสัดส่วนมนุษย์ที่สุด */}
+                    <div className="relative w-[280px] h-[480px] mx-auto">
                       {bodyView === 'Front' && showFrontReferenceImage ? (
                         <div className="absolute inset-0 flex items-center justify-center">
                           <img
                             src="/body-front-reference.png"
                             alt="Front body reference"
-                            className="h-full w-auto object-contain"
+                            className="h-full w-full object-contain"
                             onError={() => setShowFrontReferenceImage(false)}
                           />
                         </div>
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <svg viewBox="0 0 248 563" className="h-full">
-                            <g fill="none" stroke="#1f2937" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                              <ellipse cx="124" cy="54" rx="18" ry="22" />
-                              <path d="M111 74C96 79 83 87 74 98C64 110 60 126 62 143C64 160 70 178 75 196C81 218 81 240 77 261C73 282 69 305 70 328C72 344 78 357 84 370C90 387 92 405 92 423C92 457 90 490 90 524C90 538 89 552 87 563" />
-                              <path d="M137 74C152 79 165 87 174 98C184 110 188 126 186 143C184 160 178 178 173 196C167 218 167 240 171 261C175 282 179 305 178 328C176 344 170 357 164 370C158 387 156 405 156 423C156 457 158 490 158 524C158 538 159 552 161 563" />
-                              <path d="M74 124C63 146 56 170 54 196C53 220 56 244 61 267C66 286 66 306 61 323C57 337 50 351 47 364C45 372 49 379 55 379C60 379 65 376 67 370C67 377 72 382 78 382C85 381 89 375 89 367C91 375 96 379 103 375C109 372 111 363 108 355C102 336 100 315 101 294C102 262 103 230 99 197C95 170 87 145 74 124" />
-                              <path d="M174 124C185 146 192 170 194 196C195 220 192 244 187 267C182 286 182 306 187 323C191 337 198 351 201 364C203 372 199 379 193 379C188 379 183 376 181 370C181 377 176 382 170 382C163 381 159 375 159 367C157 375 152 379 145 375C139 372 137 363 140 355C146 336 148 315 147 294C146 262 145 230 149 197C153 170 161 145 174 124" />
-                              <path d="M102 130C101 166 98 205 98 244C98 283 101 322 105 360C108 390 106 420 103 449C101 474 100 499 102 524C104 539 105 552 105 563" />
-                              <path d="M146 130C147 166 150 205 150 244C150 283 147 322 143 360C140 390 142 420 145 449C147 474 148 499 146 524C144 539 143 552 143 563" />
-                              {bodyView === 'Front' ? (
-                                <>
-                                  <path d="M112 96C116 93 120 92 124 92C128 92 132 93 136 96" />
-                                  <path d="M100 172C108 164 116 161 124 161C132 161 140 164 148 172" />
-                                  <path d="M104 282C111 273 117 270 124 270C131 270 137 273 144 282" />
-                                  <path d="M118 558C120 560 122 561 124 561C126 561 128 560 130 558" />
-                                </>
-                              ) : (
-                                <>
-                                  <path d="M124 96V352" />
-                                  <path d="M102 176C109 185 117 189 124 189C131 189 139 185 146 176" />
-                                  <path d="M100 280C109 291 117 296 124 296C131 296 139 291 148 280" />
-                                  <path d="M108 92C114 88 120 86 124 86C128 86 134 88 140 92" />
-                                </>
-                              )}
-                            </g>
-                          </svg>
+                          <img 
+                            src={USER_BODY_PNG} 
+                            alt="Human Body"
+                            // ใช้ object-cover เพื่อให้รูปเต็มกรอบ และ mix-blend-multiply เพื่อลบพื้นหลังขาว
+                            className="absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-90"
+                          />
                         </div>
                       )}
 
@@ -349,7 +326,7 @@ export default function KioskStep2Symptoms({ lang }: KioskStep2Props) {
                     </div>
                   </div>
 
-                  <div className="relative mt-4 flex flex-wrap items-center justify-between gap-4 rounded-[24px] border border-white/80 bg-white/75 px-5 py-4 shadow-sm">
+                  <div className="relative mt-4 flex flex-wrap items-center justify-between gap-4 rounded-[24px] border border-surface-border bg-surface-input/50 px-5 py-4 shadow-sm">
                     <div>
                       <p className="text-sm font-heading font-bold text-text-primary">
                         {bodyView === 'Front'
@@ -368,7 +345,7 @@ export default function KioskStep2Symptoms({ lang }: KioskStep2Props) {
                     </div>
 
                     <div className="flex items-center gap-2 text-xs font-body text-text-secondary">
-                      <span className="inline-flex items-center gap-2 rounded-full bg-surface-input px-3 py-2">
+                      <span className="inline-flex items-center gap-2 rounded-full bg-white border border-surface-border px-3 py-2">
                         <span className="h-2.5 w-2.5 rounded-full bg-primary" />
                         {lang === 'EN' ? 'Interactive markers' : 'จุดที่กดเลือกได้'}
                       </span>

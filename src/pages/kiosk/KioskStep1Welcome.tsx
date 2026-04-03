@@ -17,7 +17,7 @@ export default function KioskStep1Welcome({ lang, onStart, onExisting }: KioskSt
               <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
             </svg>
           </div>
-          <span className="font-heading font-bold text-lg text-primary-dark tracking-tight">Clinical Clarity</span>
+          <span className="font-heading font-bold text-lg text-primary-dark tracking-tight">CareFlow AI</span>
         </div>
         <div className="flex items-center gap-4">
           {/* Language */}
@@ -47,7 +47,7 @@ export default function KioskStep1Welcome({ lang, onStart, onExisting }: KioskSt
       {/* Hero section */}
       <div className="flex-1 flex flex-col items-center justify-center px-8 py-12">
         <h1 className="text-5xl font-heading font-black text-text-primary text-center mb-3">
-          Welcome to <span className="text-primary">Clinical Clarity</span>
+          Welcome to <span className="text-primary">CareFlow AI</span>
         </h1>
         <p className="text-lg font-body text-text-secondary text-center mb-2">
           {lang === 'EN' ? 'Have you registered with us before?' : 'คุณเคยลงทะเบียนกับเราก่อนหน้านี้ไหม?'}

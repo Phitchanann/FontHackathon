@@ -12,7 +12,7 @@ export function KioskHeader({ step, totalSteps, lang, onLangChange }: KioskHeade
     <header className="fixed top-0 left-0 right-0 z-50 bg-surface h-20 flex items-center justify-between px-8 shadow-header">
       <div className="flex items-center gap-8">
         <span className="font-heading font-bold text-2xl text-primary-dark tracking-tight">
-          Clinical Clarity
+          CareFlow AI
         </span>
         <SimpleProgress current={step} total={totalSteps} />
       </div>

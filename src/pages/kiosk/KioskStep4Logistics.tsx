@@ -165,7 +165,7 @@ export default function KioskStep4Logistics({ lang }: KioskStep4Props) {
                         : 'bg-surface-input text-text-secondary'
                     }`}
                   >
-                    {l === 'TH' ? '🇹🇭 ภาษาไทย' : '🇬🇧 English'}
+                    {l === 'TH' ? '🇹🇭 ภาษาไทย' : 'EN English'}
                   </button>
                 ))}
               </div>

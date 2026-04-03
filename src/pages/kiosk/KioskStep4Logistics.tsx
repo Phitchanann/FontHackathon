@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from '../../components/ui/Card'
+import { useKioskData } from '../../hooks/useKioskData'
 
 interface KioskStep4Props {
   lang: 'EN' | 'TH'
@@ -15,13 +16,23 @@ const INSURANCE_OPTIONS: { value: InsuranceType; label: string; labelTH: string;
 ]
 
 export default function KioskStep4Logistics({ lang }: KioskStep4Props) {
-  const [insurance, setInsurance] = useState<InsuranceType>('government')
+  const { formData, updateFormData } = useKioskData()
+  
+  const [insurance, setInsurance] = useState<InsuranceType | ''>(formData.insurance as InsuranceType || '')
   const [provider, setProvider] = useState('')
   const [policyNumber, setPolicyNumber] = useState('')
-  const [preferredDoctor, setPreferredDoctor] = useState('')
+  const [preferredDoctor, setPreferredDoctor] = useState(formData.preferredDoctor || '')
   const [preferredLang, setPreferredLang] = useState<'EN' | 'TH'>('TH')
   const [interpreter, setInterpreter] = useState(false)
   const [accessibility, setAccessibility] = useState<string[]>([])
+
+  // บันทึกข้อมูลตอนมีการเปลี่ยนแปลง
+  useEffect(() => {
+    updateFormData({
+      insurance: insurance || '',
+      preferredDoctor,
+    })
+  }, [insurance, preferredDoctor, updateFormData])
 
   function toggleAccessibility(a: string) {
     setAccessibility((prev) => (prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]))

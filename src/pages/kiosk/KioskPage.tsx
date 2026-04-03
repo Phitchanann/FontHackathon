@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Language } from '../../types/patient'
+import { useKioskData } from '../../hooks/useKioskData'
 import KioskStep1Welcome from './KioskStep1Welcome'
 import KioskStep2Symptoms from './KioskStep2Symptoms'
 import KioskStep3MedicalHistory from './KioskStep3MedicalHistory'
@@ -16,6 +17,7 @@ export default function KioskPage() {
   const [lang, setLang] = useState<Language>('EN')
   const [done, setDone] = useState(false)
   const navigate = useNavigate()
+  const { saveToLocalStorage } = useKioskData()
 
   function next() {
     setStep((s) => Math.min(s + 1, TOTAL_STEPS))
@@ -25,6 +27,9 @@ export default function KioskPage() {
   }
 
   if (done) {
+    // บันทึกข้อมูล Chief Complaint ลง localStorage
+    saveToLocalStorage()
+    
     return (
       <div className="min-h-screen bg-surface flex flex-col items-center justify-center gap-6 text-center px-8">
         <div className="h-24 w-24 rounded-card bg-green-100 flex items-center justify-center">

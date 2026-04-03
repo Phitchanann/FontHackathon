@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from '../../components/ui/Card'
+import { useKioskData } from '../../hooks/useKioskData'
 
 // Make sure your image is placed correctly in your public folder
 const USER_BODY_PNG = '/body.png' 
@@ -154,13 +155,26 @@ const BODY_VIEW_COPY: Record<BodyView, { EN: string; TH: string }> = {
 }
 
 export default function KioskStep2Symptoms({ lang }: KioskStep2Props) {
-  const [complaint, setComplaint] = useState('')
-  const [duration, setDuration] = useState('Today')
-  const [painScale, setPainScale] = useState(6)
-  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>(['Fever', 'Nausea'])
+  const { formData, updateFormData } = useKioskData()
+  
+  const [complaint, setComplaint] = useState(formData.chiefComplaint || '')
+  const [duration, setDuration] = useState(formData.duration || '')
+  const [painScale, setPainScale] = useState(formData.painScale || 0)
+  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>(formData.selectedSymptoms || [])
   const [bodyView, setBodyView] = useState<BodyView>('Front')
-  const [selectedZones, setSelectedZones] = useState<string[]>(['head'])
+  const [selectedZones, setSelectedZones] = useState<string[]>(formData.selectedZones || [])
   const [showFrontReferenceImage, setShowFrontReferenceImage] = useState(true)
+
+  // บันทึกข้อมูลตอนมีการเปลี่ยนแปลง
+  useEffect(() => {
+    updateFormData({
+      chiefComplaint: complaint,
+      duration,
+      painScale,
+      selectedSymptoms,
+      selectedZones,
+    })
+  }, [complaint, duration, painScale, selectedSymptoms, selectedZones, updateFormData])
 
   function toggleSymptom(s: string) {
     setSelectedSymptoms((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]))

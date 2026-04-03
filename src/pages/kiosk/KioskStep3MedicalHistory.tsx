@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useKioskData } from '../../hooks/useKioskData'
 
 interface KioskStep3Props {
   lang: 'EN' | 'TH'
@@ -7,12 +8,23 @@ interface KioskStep3Props {
 const CHRONIC = ['Diabetes', 'Hypertension', 'Heart disease', 'Asthma', 'Kidney Disease', 'Other']
 
 export default function KioskStep3MedicalHistory({ lang }: KioskStep3Props) {
-  const [selectedChronic, setSelectedChronic] = useState<string[]>(['Hypertension'])
+  const { formData, updateFormData } = useKioskData()
+  
+  const [selectedChronic, setSelectedChronic] = useState<string[]>(formData.chronicDiseases || [])
   const [otherChronic, setOtherChronic] = useState('')
-  const [medications, setMedications] = useState('')
-  const [allergies, setAllergies] = useState('')
+  const [medications, setMedications] = useState(formData.medications || '')
+  const [allergies, setAllergies] = useState(formData.allergies || '')
   const [noKnownAllergies, setNoKnownAllergies] = useState(false)
   const [photoPreview] = useState<string | null>(null)
+
+  // บันทึกข้อมูลตอนมีการเปลี่ยนแปลง
+  useEffect(() => {
+    updateFormData({
+      chronicDiseases: selectedChronic,
+      medications,
+      allergies,
+    })
+  }, [selectedChronic, medications, allergies, updateFormData])
 
   function toggleChronic(c: string) {
     setSelectedChronic((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]))

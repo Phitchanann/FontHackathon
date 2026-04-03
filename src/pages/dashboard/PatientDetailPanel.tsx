@@ -19,11 +19,12 @@ export default function PatientDetailPanel({ patient, lang, onClose, onStatusCha
   const [copyStatus, setCopyStatus] = useState('')
 
   useEffect(() => {
-    setSpokenText('')
+    // ใช้ Chief Complaint จาก Kiosk เป็นค่าต้นสำหรับ Patient Speech Notes
+    setSpokenText(patient.chiefComplaint || '')
     setSpokenSummary('')
     setSoapDraft('')
     setCopyStatus('')
-  }, [patient.id])
+  }, [patient.id, patient.chiefComplaint])
 
   const aiQuestions = useMemo(
     () =>
@@ -249,11 +250,11 @@ export default function PatientDetailPanel({ patient, lang, onClose, onStatusCha
           {lang === 'EN' ? 'AI Summarize' : 'AI สรุปข้อความ'}
         </button>
 
-        <div className="mt-3 rounded-chip border border-surface-border bg-white px-3 py-3">
+        <div className="mt-3 rounded-chip border-2 border-primary/20 bg-gradient-to-br from-blue-50 to-white px-3 py-3 shadow-sm">
           <p className="text-[11px] font-body uppercase tracking-wide text-text-muted mb-1">
             {lang === 'EN' ? 'Summary Output' : 'ผลสรุป'}
           </p>
-          <p className="text-sm font-body leading-6 text-text-primary">
+          <p className="text-sm font-body leading-6 text-text-primary whitespace-pre-line">
             {spokenSummary || (lang === 'EN' ? 'No summary yet.' : 'ยังไม่มีสรุป')}
           </p>
         </div>

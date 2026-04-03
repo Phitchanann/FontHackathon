@@ -130,15 +130,68 @@ function summarizeSpeech(text: string, chiefComplaint: string, lang: 'EN' | 'TH'
       : `ผู้ป่วยให้ประวัติว่า: ${chiefComplaint}`
   }
 
-  const parts = cleaned
-    .split(/[.!?\n]+/)
-    .map((p) => p.trim())
-    .filter(Boolean)
+  const textLower = cleaned.toLowerCase()
+  const complaint = chiefComplaint.trim() || cleaned.split(/[.!?\n]+/)[0]?.trim() || cleaned
 
-  const keyPoints = parts.slice(0, 3).join('; ')
-  return lang === 'EN'
-    ? `Summary: ${chiefComplaint}. Key points: ${keyPoints}.`
-    : `สรุป: ${chiefComplaint} ประเด็นสำคัญคือ ${keyPoints}`
+  const keySymptoms: string[] = []
+  const symptomRules: Array<{ terms: string[]; labelEN: string; labelTH: string }> = [
+    { terms: ['fever', 'ไข้'], labelEN: 'Fever', labelTH: 'มีไข้' },
+    { terms: ['headache', 'ปวดหัว'], labelEN: 'Headache', labelTH: 'ปวดศีรษะ' },
+    { terms: ['cough', 'ไอ'], labelEN: 'Cough', labelTH: 'ไอ' },
+    { terms: ['shortness of breath', 'breathless', 'หอบ', 'เหนื่อย'], labelEN: 'Dyspnea', labelTH: 'หายใจลำบาก' },
+    { terms: ['vomit', 'อาเจียน'], labelEN: 'Vomiting', labelTH: 'อาเจียน' },
+    { terms: ['nausea', 'คลื่นไส้'], labelEN: 'Nausea', labelTH: 'คลื่นไส้' },
+    { terms: ['chest pain', 'เจ็บหน้าอก'], labelEN: 'Chest pain', labelTH: 'เจ็บหน้าอก' },
+    { terms: ['dizziness', 'เวียนหัว'], labelEN: 'Dizziness', labelTH: 'เวียนศีรษะ' },
+  ]
+
+  for (const rule of symptomRules) {
+    if (rule.terms.some((term) => textLower.includes(term))) {
+      keySymptoms.push(lang === 'EN' ? rule.labelEN : rule.labelTH)
+    }
+  }
+
+  const tempMatch = cleaned.match(/(\d{2}(?:\.\d)?)\s?°?\s?c/i)
+  const feverTag = tempMatch
+    ? lang === 'EN'
+      ? `Temp ${tempMatch[1]}°C`
+      : `อุณหภูมิ ${tempMatch[1]}°C`
+    : ''
+
+  const severeTerms = ['severe', 'worst', 'รุนแรง', 'มาก']
+  const hasSevere = severeTerms.some((term) => textLower.includes(term))
+  const severity = hasSevere
+    ? lang === 'EN'
+      ? 'Severity: high'
+      : 'ความรุนแรง: สูง'
+    : lang === 'EN'
+    ? 'Severity: moderate/unclear'
+    : 'ความรุนแรง: ปานกลาง/ยังไม่ชัดเจน'
+
+  const redFlags = ['chest pain', 'shortness of breath', 'faint', 'อ่อนแรงครึ่งซีก', 'หมดสติ']
+  const hasRedFlag = redFlags.some((term) => textLower.includes(term))
+
+  if (lang === 'EN') {
+    return [
+      `Chief issue: ${complaint}`,
+      `Clinical summary: ${[...new Set(keySymptoms)].slice(0, 4).join(', ') || 'General discomfort'}${
+        feverTag ? `, ${feverTag}` : ''
+      }.`,
+      severity,
+      `Risk note: ${hasRedFlag ? 'Potential red-flag symptoms present.' : 'No explicit red-flag symptom stated.'}`,
+      'Next step: verify onset, progression, meds/allergies, and vital signs.',
+    ].join('\n')
+  }
+
+  return [
+    `อาการนำ: ${complaint}`,
+    `สรุปทางคลินิก: ${[...new Set(keySymptoms)].slice(0, 4).join(', ') || 'ไม่สบายทั่วไป'}${
+      feverTag ? `, ${feverTag}` : ''
+    }`,
+    severity,
+    `ประเด็นความเสี่ยง: ${hasRedFlag ? 'มีสัญญาณเตือนที่ควรประเมินทันที' : 'ยังไม่พบสัญญาณเตือนเด่นชัดจากข้อความ'}`,
+    'ขั้นตอนถัดไป: ซักอาการเริ่มต้น การเปลี่ยนแปลงอาการ ยา/แพ้ยา และตรวจสัญญาณชีพ',
+  ].join('\n')
 }
 
 export function useTriageAI() {

@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-body bg-surface text-text-primary;
+  }
+  h1, h2, h3, h4 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-dark text-white font-body font-normal h-14 px-10 rounded-btn flex items-center justify-center gap-3 transition-colors shadow-btn;
+  }
+  .btn-secondary {
+    @apply border-2 border-surface-border text-text-primary font-body font-normal h-14 px-10 rounded-btn flex items-center justify-center gap-3 transition-colors hover:bg-surface-input;
+  }
+  .btn-ghost {
+    @apply bg-surface-input text-primary font-body font-normal h-14 px-10 rounded-btn flex items-center justify-center gap-3 transition-colors hover:bg-surface-border;
+  }
+  .card {
+    @apply bg-white rounded-card shadow-card p-8;
+  }
+  .input-field {
+    @apply bg-surface-input rounded-input px-6 py-4 text-lg font-body text-text-primary placeholder:text-text-muted w-full outline-none focus:ring-2 focus:ring-primary;
+  }
+  .textarea-field {
+    @apply bg-surface-input rounded-input px-6 py-5 text-lg font-body text-text-primary placeholder:text-text-muted w-full outline-none focus:ring-2 focus:ring-primary min-h-40 resize-none;
+  }
+  .chip {
+    @apply rounded-chip px-5 py-3 text-base font-body text-text-primary bg-surface-input cursor-pointer transition-colors hover:bg-primary-light;
+  }
+  .chip-active {
+    @apply rounded-chip px-5 py-3 text-base font-body text-primary bg-primary-light border-2 border-primary cursor-pointer;
+  }
+}

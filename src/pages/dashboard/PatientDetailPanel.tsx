@@ -1,4 +1,6 @@
+import { useEffect, useMemo, useState } from 'react'
 import { TriageBadge } from '../../components/ui/Badge'
+import { useTriageAI } from '../../hooks/useTriageAI'
 import type { QueuePatient } from '../../types/patient'
 
 interface PatientDetailPanelProps {
@@ -10,6 +12,75 @@ interface PatientDetailPanelProps {
 
 export default function PatientDetailPanel({ patient, lang, onClose, onStatusChange }: PatientDetailPanelProps) {
   const vitals = patient.vitalSigns
+  const { suggestFollowUpQuestions, summarizePatientSpeech } = useTriageAI()
+  const [spokenText, setSpokenText] = useState('')
+  const [spokenSummary, setSpokenSummary] = useState('')
+  const [soapDraft, setSoapDraft] = useState('')
+  const [copyStatus, setCopyStatus] = useState('')
+
+  useEffect(() => {
+    setSpokenText('')
+    setSpokenSummary('')
+    setSoapDraft('')
+    setCopyStatus('')
+  }, [patient.id])
+
+  const aiQuestions = useMemo(
+    () =>
+      suggestFollowUpQuestions(
+        {
+          chiefComplaint: patient.chiefComplaint,
+          painScale: patient.painScale,
+          vitalSigns: patient.vitalSigns,
+        },
+        lang
+      ),
+    [suggestFollowUpQuestions, patient.chiefComplaint, patient.painScale, patient.vitalSigns, lang]
+  )
+
+  function buildSoapDraft(summary: string) {
+    const summaryLine = summary || summarizePatientSpeech(spokenText, patient.chiefComplaint, lang)
+    const assessment =
+      lang === 'EN'
+        ? `Assessment: ${patient.triage.toUpperCase()} triage, pain ${patient.painScale}/10.`
+        : `ประเมิน: triage ระดับ ${patient.triage.toUpperCase()} ปวด ${patient.painScale}/10`
+
+    const vitalsLine = vitals
+      ? lang === 'EN'
+        ? `Vitals: BP ${vitals.bloodPressure}, HR ${vitals.heartRate}, Temp ${vitals.temperature}°C, SpO2 ${vitals.spo2}%, RR ${vitals.respiratoryRate}/min.`
+        : `สัญญาณชีพ: BP ${vitals.bloodPressure}, HR ${vitals.heartRate}, Temp ${vitals.temperature}°C, SpO2 ${vitals.spo2}%, RR ${vitals.respiratoryRate}/min.`
+      : lang === 'EN'
+      ? 'Vitals: not documented.'
+      : 'สัญญาณชีพ: ยังไม่บันทึก'
+
+    const planLine =
+      lang === 'EN'
+        ? `Plan: clarify onset, red flags, meds, allergies, and reassess after targeted history.`
+        : 'แผน: ซักอาการเริ่มต้น, red flags, ยา, แพ้ยา และประเมินซ้ำหลังซักประวัติเพิ่ม'
+
+    return [
+      lang === 'EN' ? 'S: ' : 'S: ',
+      summaryLine,
+      '',
+      lang === 'EN' ? 'O: ' : 'O: ',
+      vitalsLine,
+      '',
+      lang === 'EN' ? 'A: ' : 'A: ',
+      assessment,
+      '',
+      lang === 'EN' ? 'P: ' : 'P: ',
+      planLine,
+    ].join('\n')
+  }
+
+  async function copyDraftToClipboard(text: string) {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopyStatus(lang === 'EN' ? 'Copied to clipboard' : 'คัดลอกแล้ว')
+    } catch {
+      setCopyStatus(lang === 'EN' ? 'Copy failed' : 'คัดลอกไม่สำเร็จ')
+    }
+  }
 
   return (
     <aside className="w-80 bg-white border-l border-surface-border flex flex-col overflow-y-auto shrink-0">
@@ -53,6 +124,31 @@ export default function PatientDetailPanel({ patient, lang, onClose, onStatusCha
           {lang === 'EN' ? 'Chief Complaint' : 'อาการหลัก'}
         </p>
         <p className="text-sm font-body text-text-primary leading-relaxed">{patient.chiefComplaint}</p>
+      </div>
+
+      {/* Full snapshot */}
+      <div className="p-5 border-b border-surface-border">
+        <p className="text-xs font-body text-text-muted mb-3 uppercase tracking-wide">
+          {lang === 'EN' ? 'Complete Snapshot' : 'ข้อมูลผู้ป่วยทั้งหมด (สรุป)'}
+        </p>
+        <div className="grid grid-cols-2 gap-2 text-xs font-body text-text-secondary">
+          <div className="rounded-chip bg-surface-input px-3 py-2">
+            <p className="text-text-muted">{lang === 'EN' ? 'Status' : 'สถานะ'}</p>
+            <p className="font-medium text-text-primary">{patient.status}</p>
+          </div>
+          <div className="rounded-chip bg-surface-input px-3 py-2">
+            <p className="text-text-muted">{lang === 'EN' ? 'Assigned Nurse' : 'พยาบาลที่ดูแล'}</p>
+            <p className="font-medium text-text-primary">{patient.assignedNurse ?? '—'}</p>
+          </div>
+          <div className="rounded-chip bg-surface-input px-3 py-2">
+            <p className="text-text-muted">{lang === 'EN' ? 'Room' : 'ห้อง'}</p>
+            <p className="font-medium text-text-primary">{patient.room ?? '—'}</p>
+          </div>
+          <div className="rounded-chip bg-surface-input px-3 py-2">
+            <p className="text-text-muted">{lang === 'EN' ? 'Wait Time' : 'เวลารอ'}</p>
+            <p className="font-medium text-text-primary">{patient.waitMinutes}m</p>
+          </div>
+        </div>
       </div>
 
       {/* Vital signs */}
@@ -111,6 +207,85 @@ export default function PatientDetailPanel({ patient, lang, onClose, onStatusCha
             ))}
           </div>
         )}
+      </div>
+
+      {/* AI follow-up questions */}
+      <div className="p-5 border-b border-surface-border">
+        <p className="text-xs font-body text-text-muted mb-3 uppercase tracking-wide">
+          {lang === 'EN' ? 'AI Suggested Follow-Up Questions' : 'คำถามซักประวัติเพิ่มที่ AI แนะนำ'}
+        </p>
+        <div className="space-y-2">
+          {aiQuestions.map((question) => (
+            <div key={question} className="rounded-chip bg-primary-light/50 px-3 py-2 text-xs font-body text-text-primary leading-5">
+              {question}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Speech summarizer */}
+      <div className="p-5 border-b border-surface-border">
+        <p className="text-xs font-body text-text-muted mb-2 uppercase tracking-wide">
+          {lang === 'EN' ? 'Patient Speech Notes' : 'ข้อความที่ผู้ป่วยเล่า'}
+        </p>
+        <textarea
+          value={spokenText}
+          onChange={(e) => setSpokenText(e.target.value)}
+          placeholder={
+            lang === 'EN'
+              ? 'Paste or type what the patient said...'
+              : 'วางหรือพิมพ์ข้อความที่ผู้ป่วยเล่า...'
+          }
+          className="w-full min-h-24 rounded-chip bg-surface-input px-3 py-3 text-sm font-body text-text-primary outline-none focus:ring-2 focus:ring-primary"
+        />
+        <button
+          onClick={() => {
+            const summary = summarizePatientSpeech(spokenText, patient.chiefComplaint, lang)
+            setSpokenSummary(summary)
+            setSoapDraft(buildSoapDraft(summary))
+          }}
+          className="mt-3 h-10 px-4 rounded-chip bg-primary text-white text-sm font-body hover:bg-primary-dark"
+        >
+          {lang === 'EN' ? 'AI Summarize' : 'AI สรุปข้อความ'}
+        </button>
+
+        <div className="mt-3 rounded-chip border border-surface-border bg-white px-3 py-3">
+          <p className="text-[11px] font-body uppercase tracking-wide text-text-muted mb-1">
+            {lang === 'EN' ? 'Summary Output' : 'ผลสรุป'}
+          </p>
+          <p className="text-sm font-body leading-6 text-text-primary">
+            {spokenSummary || (lang === 'EN' ? 'No summary yet.' : 'ยังไม่มีสรุป')}
+          </p>
+        </div>
+
+        <div className="mt-3 flex gap-2">
+          <button
+            onClick={() => {
+              const summary = summarizePatientSpeech(spokenText, patient.chiefComplaint, lang)
+              setSpokenSummary(summary)
+              setSoapDraft(buildSoapDraft(summary))
+            }}
+            className="h-10 px-4 rounded-chip border border-surface-border bg-surface-input text-sm font-body text-text-primary hover:bg-white"
+          >
+            {lang === 'EN' ? 'Generate SOAP Draft' : 'สร้าง SOAP Draft'}
+          </button>
+          <button
+            onClick={() => copyDraftToClipboard(soapDraft || buildSoapDraft(spokenSummary))}
+            className="h-10 px-4 rounded-chip bg-primary-light text-primary text-sm font-body hover:bg-primary hover:text-white"
+          >
+            {lang === 'EN' ? 'Copy Draft' : 'คัดลอก Draft'}
+          </button>
+        </div>
+        {copyStatus && <p className="mt-2 text-xs font-body text-text-muted">{copyStatus}</p>}
+
+        <div className="mt-3 rounded-chip border border-dashed border-surface-border bg-surface-input/40 px-3 py-3">
+          <p className="text-[11px] font-body uppercase tracking-wide text-text-muted mb-1">
+            {lang === 'EN' ? 'SOAP Draft' : 'SOAP Draft'}
+          </p>
+          <pre className="whitespace-pre-wrap text-xs font-body leading-5 text-text-primary">
+            {soapDraft || buildSoapDraft(spokenSummary)}
+          </pre>
+        </div>
       </div>
 
       {/* Actions */}

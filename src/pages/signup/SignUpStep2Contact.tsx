@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import SignUpShell from '../../components/signup/SignUpShell'
+import { MOCK_CITIZEN_CARD } from '../../data/mockCitizenCard'
 
 interface SignUpStep2Props {
   lang: 'EN' | 'TH'
@@ -12,10 +13,12 @@ const PROVINCES = ['Bangkok (กรุงเทพมหานคร)', 'Chiang 
 const DISTRICTS = ['Pathum Wan (ปทุมวัน)', 'Bang Rak (บางรัก)', 'Watthana (วัฒนา)', 'Huai Khwang (ห้วยขวาง)']
 
 export default function SignUpStep2Contact({ lang, onLangChange, onBack, onNext }: SignUpStep2Props) {
-  const [phone, setPhone] = useState('')
+  const [phone, setPhone] = useState(MOCK_CITIZEN_CARD.phone)
   const [province, setProvince] = useState(PROVINCES[0])
   const [district, setDistrict] = useState(DISTRICTS[0])
-  const [registeredAddress, setRegisteredAddress] = useState('')
+  const [registeredAddress] = useState(
+    lang === 'EN' ? MOCK_CITIZEN_CARD.registeredAddressEN : MOCK_CITIZEN_CARD.registeredAddressTH
+  )
   const [currentAddress, setCurrentAddress] = useState('')
   const [sameAsRegistered, setSameAsRegistered] = useState(false)
 
@@ -52,6 +55,25 @@ export default function SignUpStep2Contact({ lang, onLangChange, onBack, onNext 
       }
     >
       <div className="space-y-6">
+        <section className="signup-panel border-l-4 border-l-primary p-6 sm:p-7">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <label className="signup-label">
+                {lang === 'EN' ? 'Citizen ID Card Reader' : 'เครื่องอ่านบัตรประชาชน'}
+              </label>
+              <p className="signup-helper mt-1">
+                {lang === 'EN'
+                  ? 'Registered address is filled from the card and locked to prevent editing.'
+                  : 'ที่อยู่ตามทะเบียนบ้านจะถูกดึงจากบัตรและล็อกไม่ให้แก้ไข'}
+              </p>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary-light px-4 py-2 text-sm font-body text-primary">
+              <span className="h-2.5 w-2.5 rounded-full bg-primary" />
+              {lang === 'EN' ? 'Card data loaded' : 'ดึงข้อมูลจากบัตรแล้ว'}
+            </div>
+          </div>
+        </section>
+
         <section className="signup-panel border-l-4 border-l-primary p-6 sm:p-7">
           <label className="signup-label">
             {lang === 'EN' ? 'Mobile Phone Number' : 'เบอร์โทรศัพท์มือถือ'}
@@ -91,10 +113,15 @@ export default function SignUpStep2Contact({ lang, onLangChange, onBack, onNext 
               </p>
               <textarea
                 value={registeredAddress}
-                onChange={(event) => setRegisteredAddress(event.target.value)}
                 placeholder={lang === 'EN' ? 'House No, Street, Sub-district...' : 'บ้านเลขที่ ถนน แขวง/ตำบล...'}
-                className="textarea-field mt-4 min-h-44"
+                readOnly
+                className="textarea-field mt-4 min-h-44 bg-[#f7f9fc] text-text-primary opacity-95"
               />
+              <p className="mt-3 text-xs font-body text-text-muted">
+                {lang === 'EN'
+                  ? 'This field is locked because it comes from the ID card.'
+                  : 'ช่องนี้ล็อกไว้เพราะดึงข้อมูลจากบัตรประชาชน'}
+              </p>
             </section>
 
             <section className="signup-panel p-6 sm:p-7">

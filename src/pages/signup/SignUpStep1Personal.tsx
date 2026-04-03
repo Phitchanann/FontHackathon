@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import SignUpShell from '../../components/signup/SignUpShell'
+import { MOCK_CITIZEN_CARD } from '../../data/mockCitizenCard'
 
 interface SignUpStep1Props {
   lang: 'EN' | 'TH'
@@ -14,6 +15,15 @@ export default function SignUpStep1Personal({ lang, onLangChange, onNext }: Sign
   const [gender, setGender] = useState<'male' | 'female' | ''>('')
   const [dob, setDob] = useState('')
   const [idNumber, setIdNumber] = useState('')
+  const [cardStatus, setCardStatus] = useState<'idle' | 'ready'>('idle')
+
+  function fillFromCitizenCard() {
+    setName(lang === 'EN' ? MOCK_CITIZEN_CARD.fullNameEN : MOCK_CITIZEN_CARD.fullNameTH)
+    setDob(MOCK_CITIZEN_CARD.dob)
+    setIdNumber(MOCK_CITIZEN_CARD.idNumber)
+    setGender(MOCK_CITIZEN_CARD.gender)
+    setCardStatus('ready')
+  }
 
   const age = 34
   const heightCm = 175
@@ -53,6 +63,41 @@ export default function SignUpStep1Personal({ lang, onLangChange, onNext }: Sign
       <div className="grid gap-6 xl:grid-cols-[1.2fr,0.8fr]">
         <div className="space-y-6">
           <section className="signup-panel p-6 sm:p-7">
+            <div className="mb-5 rounded-3xl border border-dashed border-primary/25 bg-primary-light/35 px-5 py-4">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-xs font-body uppercase tracking-[0.18em] text-primary">{lang === 'EN' ? 'Citizen ID Card Reader' : 'เครื่องอ่านบัตรประชาชน'}</p>
+                  <p className="mt-1 text-sm font-body text-text-secondary">
+                    {lang === 'EN'
+                      ? 'Insert or tap the card to auto-fill identity fields.'
+                      : 'เสียบหรือแตะบัตรเพื่อดึงข้อมูลส่วนตัวเข้าฟอร์มอัตโนมัติ'}
+                  </p>
+                </div>
+                <button type="button" onClick={fillFromCitizenCard} className="btn-primary whitespace-nowrap">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                    <path d="M7 9h10M7 13h5" />
+                  </svg>
+                  {lang === 'EN' ? 'Read ID Card' : 'อ่านบัตรประชาชน'}
+                </button>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs font-body text-text-secondary">
+                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 shadow-sm">
+                  <span className={`h-2.5 w-2.5 rounded-full ${cardStatus === 'ready' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                  {cardStatus === 'ready'
+                    ? lang === 'EN'
+                      ? 'Card data loaded'
+                      : 'ดึงข้อมูลจากบัตรแล้ว'
+                    : lang === 'EN'
+                    ? 'Waiting for card'
+                    : 'รอเสียบบัตร'}
+                </span>
+                <span className="inline-flex items-center rounded-full bg-white px-3 py-1.5 shadow-sm">
+                  {lang === 'EN' ? 'Auto-fill Full Name / DOB / ID / Gender' : 'เติมอัตโนมัติ: ชื่อ วันเกิด เลขบัตร เพศ'}
+                </span>
+              </div>
+            </div>
+
             <div className="grid gap-5 md:grid-cols-2">
               <div className="md:col-span-2">
                 <label className="signup-label">

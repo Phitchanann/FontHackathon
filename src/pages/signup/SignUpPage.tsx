@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom'
 
 export default function SignUpPage() {
   const [step, setStep] = useState(1)
-  const [lang] = useState<Language>('EN')
+  const [lang, setLang] = useState<Language>('EN')
   const navigate = useNavigate()
 
   function next() { setStep((s) => Math.min(s + 1, 5)) }
@@ -18,11 +18,11 @@ export default function SignUpPage() {
 
   return (
     <>
-      {step === 1 && <SignUpStep1Personal lang={lang} onNext={next} />}
-      {step === 2 && <SignUpStep2Contact lang={lang} onBack={back} onNext={next} />}
-      {step === 3 && <SignUpStep3Emergency lang={lang} onBack={back} onNext={next} />}
-      {step === 4 && <SignUpStep4Insurance lang={lang} onBack={back} onNext={next} />}
-      {step === 5 && <SignUpStep5ClinicalAlerts lang={lang} onBack={back} onSubmit={handleSubmit} />}
+      {step === 1 && <SignUpStep1Personal lang={lang} onLangChange={setLang} onNext={next} />}
+      {step === 2 && <SignUpStep2Contact lang={lang} onLangChange={setLang} onBack={back} onNext={next} />}
+      {step === 3 && <SignUpStep3Emergency lang={lang} onLangChange={setLang} onBack={back} onNext={next} />}
+      {step === 4 && <SignUpStep4Insurance lang={lang} onLangChange={setLang} onBack={back} onNext={next} />}
+      {step === 5 && <SignUpStep5ClinicalAlerts lang={lang} onLangChange={setLang} onBack={back} onSubmit={handleSubmit} />}
     </>
   )
 }

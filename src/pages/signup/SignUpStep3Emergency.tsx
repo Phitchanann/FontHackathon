@@ -1,176 +1,164 @@
 import { useState } from 'react'
-import { ProgressBar } from '../../components/ui/ProgressBar'
+import SignUpShell from '../../components/signup/SignUpShell'
 
 interface SignUpStep3Props {
   lang: 'EN' | 'TH'
+  onLangChange: (lang: 'EN' | 'TH') => void
   onBack: () => void
   onNext: () => void
 }
 
-const RELATIONSHIPS_EN = ['Spouse', 'Parent', 'Child', 'Sibling', 'Friend', 'Other']
-const RELATIONSHIPS_TH = ['คู่สมรส', 'พ่อ/แม่', 'ลูก', 'พี่น้อง', 'เพื่อน', 'อื่นๆ']
-const STEPS_EN = ['Personal', 'Contact', 'Emergency', 'Insurance', 'Alerts']
+const RELATIONSHIPS = [
+  { value: 'father', en: 'Father / บิดา', th: 'บิดา' },
+  { value: 'mother', en: 'Mother / มารดา', th: 'มารดา' },
+  { value: 'spouse', en: 'Spouse / คู่สมรส', th: 'คู่สมรส' },
+  { value: 'child', en: 'Child / บุตร', th: 'บุตร' },
+  { value: 'other', en: 'Other / อื่นๆ', th: 'อื่นๆ' },
+]
 
-export default function SignUpStep3Emergency({ lang, onBack, onNext }: SignUpStep3Props) {
-  const [name, setName] = useState('')
-  const [nameTH, setNameTH] = useState('')
-  const [relationship, setRelationship] = useState('')
+export default function SignUpStep3Emergency({ lang, onLangChange, onBack, onNext }: SignUpStep3Props) {
+  const [fullName, setFullName] = useState('')
+  const [relationship, setRelationship] = useState('spouse')
   const [phone, setPhone] = useState('')
-  const [phone2, setPhone2] = useState('')
-  const [email, setEmail] = useState('')
-
-  const relationships = lang === 'EN' ? RELATIONSHIPS_EN : RELATIONSHIPS_TH
+  const [address, setAddress] = useState('')
 
   return (
-    <div className="min-h-screen bg-surface">
-      <header className="bg-white shadow-header px-8 py-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+    <SignUpShell
+      currentStep={3}
+      lang={lang}
+      onLangChange={onLangChange}
+      title={lang === 'EN' ? 'Emergency Contact' : 'ผู้ติดต่อฉุกเฉิน'}
+      subtitle={
+        lang === 'EN'
+          ? 'Who should we reach in case of emergency?'
+          : 'ควรติดต่อใครหากเกิดเหตุฉุกเฉิน'
+      }
+      footer={
+        <div className="flex items-center justify-between gap-4">
+          <button onClick={onBack} className="inline-flex items-center gap-2 text-sm font-body text-text-secondary transition-colors hover:text-text-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5" />
+              <path d="M12 19l-7-7 7-7" />
             </svg>
-          </div>
-          <span className="font-heading font-bold text-xl text-primary-dark">Clinical Clarity</span>
+            {lang === 'EN' ? 'Previous' : 'ย้อนกลับ'}
+          </button>
+          <button onClick={onNext} className="btn-primary">
+            {lang === 'EN' ? 'Next Step' : 'ขั้นตอนถัดไป'}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+              <path d="M5 12h14" />
+              <path d="M12 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
-        <ProgressBar current={3} total={5} steps={STEPS_EN} />
-      </header>
-
-      <div className="max-w-2xl mx-auto py-12 px-8">
-        {/* Header with decorative element */}
-        <div className="mb-10 relative">
-          <div className="absolute -top-4 -right-4 h-32 w-32 bg-primary-light rounded-full opacity-50 blur-2xl pointer-events-none" />
-          <h1 className="text-4xl font-heading font-bold text-text-primary">
-            {lang === 'EN' ? 'Emergency Contact' : 'ผู้ติดต่อฉุกเฉิน'}
-          </h1>
-          <p className="text-lg font-body text-text-secondary mt-2">
-            {lang === 'EN'
-              ? 'Step 3 of 5 — Someone we can contact in case of emergency'
-              : 'ขั้นตอนที่ 3 จาก 5 — ผู้ที่ติดต่อได้เมื่อเกิดเหตุฉุกเฉิน'}
-          </p>
-        </div>
-
-        <form className="flex flex-col gap-6" onSubmit={(e) => { e.preventDefault(); onNext() }}>
-          {/* Name */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-body text-text-secondary">
-                {lang === 'EN' ? 'Full Name (EN) *' : 'ชื่อ-นามสกุล (อังกฤษ) *'}
-              </label>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Full name..."
-                className="input-field"
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-body text-text-secondary">
-                {lang === 'EN' ? 'Full Name (TH)' : 'ชื่อ-นามสกุล (ไทย)'}
-              </label>
-              <input
-                value={nameTH}
-                onChange={(e) => setNameTH(e.target.value)}
-                placeholder="ชื่อ-นามสกุล..."
-                className="input-field"
-              />
-            </div>
-          </div>
-
-          {/* Relationship */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-body text-text-secondary">
-              {lang === 'EN' ? 'Relationship *' : 'ความสัมพันธ์ *'}
+      }
+    >
+      <div className="space-y-6">
+        <section className="signup-panel bg-[#fbfcfe] p-6 sm:p-7">
+          <div>
+            <label className="signup-label">
+              {lang === 'EN' ? 'Full Name of Emergency Contact' : 'ชื่อ-นามสกุลผู้ติดต่อฉุกเฉิน'}
             </label>
-            <div className="flex flex-wrap gap-3">
-              {relationships.map((r) => (
+            <input
+              value={fullName}
+              onChange={(event) => setFullName(event.target.value)}
+              placeholder={lang === 'EN' ? 'e.g. Somchai Rakdee' : 'เช่น สมชาย รักดี'}
+              className="input-field mt-3"
+            />
+          </div>
+
+          <div className="mt-6">
+            <label className="signup-label">
+              {lang === 'EN' ? 'Relationship / ความสัมพันธ์' : 'ความสัมพันธ์'}
+            </label>
+            <div className="mt-3 flex flex-wrap gap-3">
+              {RELATIONSHIPS.map((option) => (
                 <button
+                  key={option.value}
                   type="button"
-                  key={r}
-                  onClick={() => setRelationship(r)}
-                  className={`px-5 h-12 rounded-chip text-base font-body transition-colors ${
-                    relationship === r
-                      ? 'bg-primary-light text-primary border-2 border-primary'
-                      : 'bg-surface-input text-text-secondary'
+                  onClick={() => setRelationship(option.value)}
+                  className={`rounded-2xl px-5 py-3 text-sm font-body transition-colors ${
+                    relationship === option.value
+                      ? 'bg-primary-light text-primary shadow-sm'
+                      : 'bg-[#f3f5f8] text-text-secondary hover:bg-[#eaf0f8]'
                   }`}
                 >
-                  {r}
+                  {lang === 'EN' ? option.en : option.th}
                 </button>
               ))}
             </div>
           </div>
+        </section>
 
-          {/* Phone numbers */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-body text-text-secondary">
-                {lang === 'EN' ? 'Phone Number *' : 'เบอร์โทรศัพท์ *'}
-              </label>
-              <input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="08X-XXX-XXXX"
-                type="tel"
-                className="input-field"
-                required
-              />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <section className="signup-panel border-l-4 border-l-danger p-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-danger">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.6 19.8 19.8 0 0 1 1.61 5 2 2 0 0 1 3.6 3h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11l-.98.98a16 16 0 0 0 6 6l.97-.97a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.82.7a2 2 0 0 1 1.73 1.99z" />
+                </svg>
+              </div>
+              <div>
+                <p className="signup-label">Phone Number</p>
+                <p className="text-[11px] font-body uppercase tracking-[0.12em] text-danger/90">
+                  {lang === 'EN' ? 'Required for consent' : 'จำเป็นสำหรับการยินยอม'}
+                </p>
+              </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-body text-text-secondary">
-                {lang === 'EN' ? 'Alt. Phone Number' : 'เบอร์สำรอง'}
-              </label>
-              <input
-                value={phone2}
-                onChange={(e) => setPhone2(e.target.value)}
-                placeholder="08X-XXX-XXXX"
-                type="tel"
-                className="input-field"
-              />
-            </div>
-          </div>
 
-          {/* Email */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-body text-text-secondary">
-              {lang === 'EN' ? 'Email (for notifications)' : 'อีเมล (สำหรับแจ้งเตือน)'}
-            </label>
             <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="contact@email.com"
-              type="email"
-              className="input-field"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              placeholder="08X-XXX-XXXX"
+              className="input-field mt-5"
             />
-          </div>
+          </section>
 
-          {/* Info box */}
-          <div className="bg-primary-light rounded-chip p-4 flex gap-3">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00478d" strokeWidth="2" className="shrink-0 mt-0.5">
-              <circle cx="12" cy="12" r="10" /><path d="M12 8v4M12 16h.01" />
-            </svg>
-            <p className="text-sm font-body text-primary">
-              {lang === 'EN'
-                ? 'This person will be contacted in case of emergency or if you are unable to communicate.'
-                : 'บุคคลนี้จะได้รับการติดต่อในกรณีฉุกเฉินหรือหากคุณไม่สามารถสื่อสารได้'}
-            </p>
-          </div>
+          <section className="signup-panel border-l-4 border-l-cyan-400 p-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </div>
+              <div>
+                <p className="signup-label">Address</p>
+                <p className="text-[11px] font-body uppercase tracking-[0.12em] text-text-muted">
+                  {lang === 'EN' ? 'Optional' : 'ไม่บังคับ'}
+                </p>
+              </div>
+            </div>
 
-          <div className="flex justify-between pt-4">
-            <button type="button" onClick={onBack} className="btn-secondary">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M19 12H5M12 5l-7 7 7 7" />
+            <input
+              value={address}
+              onChange={(event) => setAddress(event.target.value)}
+              placeholder={lang === 'EN' ? 'House no, Street, City...' : 'บ้านเลขที่ ถนน เมือง...'}
+              className="input-field mt-5"
+            />
+          </section>
+        </div>
+
+        <section className="signup-panel bg-gradient-to-r from-[#eef6ff] to-[#f7fbff] p-5 sm:p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
-              {lang === 'EN' ? 'Back' : 'ย้อนกลับ'}
-            </button>
-            <button type="submit" className="btn-primary">
-              {lang === 'EN' ? 'Next: Insurance' : 'ถัดไป: สิทธิ์การรักษา'}
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </button>
+            </div>
+
+            <div>
+              <p className="text-sm font-body font-semibold text-primary">
+                {lang === 'EN' ? 'Privacy & Consent' : 'ความเป็นส่วนตัวและความยินยอม'}
+              </p>
+              <p className="mt-1 text-sm font-body leading-6 text-text-secondary">
+                {lang === 'EN'
+                  ? 'We only contact this person in case of a medical emergency or when legal consent is required during triage. Your data is protected by hospital security standards.'
+                  : 'เราจะติดต่อบุคคลนี้เฉพาะเมื่อเกิดเหตุฉุกเฉินทางการแพทย์ หรือเมื่อต้องใช้ความยินยอมตามกฎหมายในขั้นตอนคัดกรอง ข้อมูลของคุณจะถูกเก็บรักษาตามมาตรฐานความปลอดภัยของโรงพยาบาล'}
+              </p>
+            </div>
           </div>
-        </form>
+        </section>
       </div>
-    </div>
+    </SignUpShell>
   )
 }

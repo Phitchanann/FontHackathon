@@ -36,4 +36,19 @@
   .chip-active {
     @apply rounded-chip px-5 py-3 text-base font-body text-primary bg-primary-light border-2 border-primary cursor-pointer;
   }
+  .signup-shell-card {
+    @apply rounded-[28px] border border-[#e8edf4] bg-white shadow-card;
+  }
+  .signup-panel {
+    @apply rounded-[28px] border border-[#edf2f7] bg-white shadow-card;
+  }
+  .signup-label {
+    @apply text-[10px] font-body font-semibold uppercase tracking-[0.18em] text-text-muted;
+  }
+  .signup-helper {
+    @apply text-xs font-body text-text-muted;
+  }
+  .btn-danger-outline {
+    @apply inline-flex h-12 items-center justify-center rounded-btn border border-danger/20 bg-white px-5 text-sm font-body text-danger transition-colors hover:bg-red-50;
+  }
 }

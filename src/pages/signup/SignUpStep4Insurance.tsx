@@ -1,163 +1,254 @@
 import { useState } from 'react'
-import { ProgressBar } from '../../components/ui/ProgressBar'
+import type { ReactNode } from 'react'
+import SignUpShell from '../../components/signup/SignUpShell'
 
 interface SignUpStep4Props {
   lang: 'EN' | 'TH'
+  onLangChange: (lang: 'EN' | 'TH') => void
   onBack: () => void
   onNext: () => void
 }
 
-const STEPS_EN = ['Personal', 'Contact', 'Emergency', 'Insurance', 'Alerts']
+type PrimaryRight = 'self-pay' | 'social-security' | '30-baht' | 'civil-servant'
 
-type InsuranceType = 'government' | 'social-security' | 'private' | 'self-pay'
-
-const OPTIONS = [
-  { value: 'government' as InsuranceType, labelEN: 'Government / UC Scheme (บัตรทอง)', labelTH: 'บัตรทอง / สิทธิ์ราชการ', icon: '🏛️' },
-  { value: 'social-security' as InsuranceType, labelEN: 'Social Security (SSO)', labelTH: 'ประกันสังคม', icon: '🛡️' },
-  { value: 'private' as InsuranceType, labelEN: 'Private Insurance', labelTH: 'ประกันเอกชน', icon: '💼' },
-  { value: 'self-pay' as InsuranceType, labelEN: 'Self-Pay / Cash', labelTH: 'ชำระเอง / เงินสด', icon: '💵' },
+const PRIMARY_RIGHTS: Array<{
+  value: PrimaryRight
+  en: string
+  th: string
+  desc: string
+  icon: ReactNode
+}> = [
+  {
+    value: 'self-pay',
+    en: 'Self-pay',
+    th: 'ชำระเงินเอง',
+    desc: 'ชำระเงินเอง',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="2" y="6" width="20" height="12" rx="2" />
+        <path d="M12 10v4" />
+        <path d="M8 12h8" />
+      </svg>
+    ),
+  },
+  {
+    value: 'social-security',
+    en: 'Social Security',
+    th: 'ประกันสังคม',
+    desc: 'ประกันสังคม',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="10" cy="7" r="4" />
+        <path d="M20 8v6" />
+        <path d="M23 11h-6" />
+      </svg>
+    ),
+  },
+  {
+    value: '30-baht',
+    en: '30-Baht',
+    th: 'บัตรทอง',
+    desc: 'บัตรทอง',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="M3 10h18" />
+      </svg>
+    ),
+  },
+  {
+    value: 'civil-servant',
+    en: 'Civil Servant',
+    th: 'สิทธิข้าราชการ',
+    desc: 'สิทธิข้าราชการ',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <path d="M9 12l2 2 4-4" />
+      </svg>
+    ),
+  },
 ]
 
-export default function SignUpStep4Insurance({ lang, onBack, onNext }: SignUpStep4Props) {
-  const [insuranceType, setInsuranceType] = useState<InsuranceType>('government')
-  const [provider, setProvider] = useState('')
+export default function SignUpStep4Insurance({ lang, onLangChange, onBack, onNext }: SignUpStep4Props) {
+  const [primaryRight, setPrimaryRight] = useState<PrimaryRight>('self-pay')
+  const [companyName, setCompanyName] = useState('')
   const [policyNumber, setPolicyNumber] = useState('')
-  const [memberNumber, setMemberNumber] = useState('')
-  const [idCardFile, setIdCardFile] = useState<string | null>(null)
-
-  const showProviderFields = insuranceType === 'private' || insuranceType === 'social-security'
+  const [occupation, setOccupation] = useState('')
+  const [workplace, setWorkplace] = useState('')
 
   return (
-    <div className="min-h-screen bg-surface">
-      <header className="bg-white shadow-header px-8 py-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+    <SignUpShell
+      currentStep={4}
+      lang={lang}
+      onLangChange={onLangChange}
+      title={
+        <>
+          {lang === 'EN' ? 'Financial & Insurance ' : 'ข้อมูลการเงินและประกัน '}
+          <span className="text-primary">{lang === 'EN' ? 'Data' : 'การรักษา'}</span>
+        </>
+      }
+      subtitle={
+        lang === 'EN'
+          ? 'Please provide your coverage information. This helps with accurate billing and occupational health analysis.'
+          : 'กรุณาระบุข้อมูลสิทธิ์การรักษา เพื่อให้การเรียกเก็บเงินถูกต้องและช่วยวิเคราะห์ความเสี่ยงจากการทำงาน'
+      }
+      footer={
+        <div className="flex items-center justify-between gap-4">
+          <button onClick={onBack} className="inline-flex items-center gap-2 text-sm font-body text-text-secondary transition-colors hover:text-text-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5" />
+              <path d="M12 19l-7-7 7-7" />
             </svg>
-          </div>
-          <span className="font-heading font-bold text-xl text-primary-dark">Clinical Clarity</span>
+            {lang === 'EN' ? 'Previous Step' : 'ขั้นตอนก่อนหน้า'}
+          </button>
+          <button onClick={onNext} className="btn-primary">
+            {lang === 'EN' ? 'Next Step' : 'ขั้นตอนถัดไป'}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+              <path d="M5 12h14" />
+              <path d="M12 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
-        <ProgressBar current={4} total={5} steps={STEPS_EN} />
-      </header>
-
-      <div className="max-w-2xl mx-auto py-12 px-8">
-        <div className="mb-10">
-          <h1 className="text-4xl font-heading font-bold text-text-primary">
-            {lang === 'EN' ? 'Financial & Insurance' : 'สิทธิ์การรักษาและการเงิน'}
-          </h1>
-          <p className="text-lg font-body text-text-secondary mt-2">
-            {lang === 'EN' ? 'Step 4 of 5 — Coverage information' : 'ขั้นตอนที่ 4 จาก 5'}
-          </p>
-        </div>
-
-        <form className="flex flex-col gap-6" onSubmit={(e) => { e.preventDefault(); onNext() }}>
-          {/* Insurance type */}
-          <div className="flex flex-col gap-3">
-            <label className="text-sm font-body text-text-secondary">
-              {lang === 'EN' ? 'Insurance Type *' : 'ประเภทสิทธิ์ *'}
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              {OPTIONS.map((opt) => (
-                <button
-                  type="button"
-                  key={opt.value}
-                  onClick={() => setInsuranceType(opt.value)}
-                  className={`h-20 flex items-center gap-3 px-5 rounded-chip border-2 transition-all text-left ${
-                    insuranceType === opt.value
-                      ? 'bg-primary-light border-primary'
-                      : 'bg-white border-transparent shadow-sm hover:border-primary-light'
-                  }`}
-                >
-                  <span className="text-2xl">{opt.icon}</span>
-                  <span className="text-base font-body text-text-primary">
-                    {lang === 'EN' ? opt.labelEN : opt.labelTH}
-                  </span>
-                </button>
-              ))}
-            </div>
+      }
+    >
+      <div className="space-y-8">
+        <section>
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-sm font-heading font-bold text-white">1</div>
+            <h2 className="text-2xl font-heading font-bold text-text-primary">
+              {lang === 'EN' ? 'Primary Right' : 'สิทธิ์หลัก'}
+            </h2>
           </div>
 
-          {/* Provider fields */}
-          {showProviderFields && (
-            <div className="flex flex-col gap-4 p-6 bg-surface-input rounded-chip">
-              <p className="text-sm font-body text-text-secondary font-medium">
-                {lang === 'EN' ? 'Insurance Details' : 'รายละเอียดประกัน'}
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {PRIMARY_RIGHTS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setPrimaryRight(option.value)}
+                className={`signup-panel flex flex-col items-center gap-4 p-5 text-center transition-all ${
+                  primaryRight === option.value
+                    ? 'border-primary text-primary shadow-[0_16px_40px_rgba(0,71,141,0.14)]'
+                    : 'hover:border-primary/30'
+                }`}
+              >
+                <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${primaryRight === option.value ? 'bg-primary text-white' : 'bg-[#f3f5f8] text-text-secondary'}`}>
+                  {option.icon}
+                </div>
+                <div>
+                  <p className="text-base font-body font-semibold text-text-primary">
+                    {lang === 'EN' ? option.en : option.th}
+                  </p>
+                  <p className="mt-1 text-sm font-body text-text-muted">{option.desc}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-400 text-sm font-heading font-bold text-white">2</div>
+            <h2 className="text-2xl font-heading font-bold text-text-primary">
+              {lang === 'EN' ? 'Private Insurance / ประกันเอกชน' : 'ประกันเอกชน'}
+            </h2>
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-[1fr,340px]">
+            <section className="signup-panel p-6 sm:p-7">
+              <div className="grid gap-5">
+                <div>
+                  <label className="signup-label">
+                    {lang === 'EN' ? 'Company Name / ชื่อบริษัทประกัน' : 'ชื่อบริษัทประกัน'}
+                  </label>
+                  <input
+                    value={companyName}
+                    onChange={(event) => setCompanyName(event.target.value)}
+                    placeholder={lang === 'EN' ? 'e.g. Allianz, AIA, Muang Thai' : 'เช่น Allianz, AIA, เมืองไทย'}
+                    className="input-field mt-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="signup-label">
+                    {lang === 'EN' ? 'Policy Number / หมายเลขกรมธรรม์' : 'หมายเลขกรมธรรม์'}
+                  </label>
+                  <input
+                    value={policyNumber}
+                    onChange={(event) => setPolicyNumber(event.target.value)}
+                    placeholder="XXX-XXX-XXXX"
+                    className="input-field mt-2"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section className="overflow-hidden rounded-[28px] bg-gradient-to-br from-[#163f5f] via-[#1d6fae] to-[#64c0e7] p-6 text-white shadow-card">
+              <p className="text-xs font-body uppercase tracking-[0.18em] text-white/70">Occupational Safety</p>
+              <h3 className="mt-4 text-3xl font-heading font-bold leading-tight">
+                Personalized
+                <br />
+                Health Analysis
+              </h3>
+              <p className="mt-4 max-w-[240px] text-sm font-body leading-6 text-white/80">
+                {lang === 'EN'
+                  ? 'We use insurance and work information to prepare the right triage and billing workflow.'
+                  : 'เราใช้ข้อมูลสิทธิ์และการทำงานเพื่อจัดเส้นทางคัดกรองและการเงินที่เหมาะสม'}
               </p>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-body text-text-muted">
-                  {lang === 'EN' ? 'Insurance Provider' : 'บริษัทประกัน'}
-                </label>
-                <input
-                  value={provider}
-                  onChange={(e) => setProvider(e.target.value)}
-                  placeholder={lang === 'EN' ? 'e.g. AIA, Muang Thai Life...' : 'เช่น AIA, เมืองไทยประกันชีวิต...'}
-                  className="input-field"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-body text-text-muted">
-                    {lang === 'EN' ? 'Policy Number' : 'หมายเลขกรมธรรม์'}
-                  </label>
-                  <input value={policyNumber} onChange={(e) => setPolicyNumber(e.target.value)} className="input-field" />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-body text-text-muted">
-                    {lang === 'EN' ? 'Member Number' : 'หมายเลขสมาชิก'}
-                  </label>
-                  <input value={memberNumber} onChange={(e) => setMemberNumber(e.target.value)} className="input-field" />
-                </div>
-              </div>
-            </div>
-          )}
 
-          {/* ID / Insurance card upload */}
-          <div className="flex flex-col gap-3">
-            <label className="text-sm font-body text-text-secondary">
-              {lang === 'EN' ? 'Upload ID / Insurance Card (optional)' : 'อัปโหลดบัตรประชาชน / บัตรประกัน'}
-            </label>
-            <label className="cursor-pointer">
-              <div className="h-32 border-2 border-dashed border-surface-border rounded-chip flex flex-col items-center justify-center gap-2 hover:border-primary hover:bg-primary-light/20 transition-colors">
-                {idCardFile ? (
-                  <span className="text-sm font-body text-primary">✓ File uploaded</span>
-                ) : (
-                  <>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c2c6d4" strokeWidth="2">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
-                    </svg>
-                    <span className="text-sm font-body text-text-muted">
-                      {lang === 'EN' ? 'Click to upload or take photo' : 'คลิกเพื่ออัปโหลดหรือถ่ายรูป'}
-                    </span>
-                    <span className="text-xs font-body text-text-muted">JPG, PNG, PDF — max 5MB</span>
-                  </>
-                )}
+              <div className="relative mt-8 h-28 overflow-hidden rounded-[22px] bg-white/10">
+                <div className="absolute left-6 top-1/2 h-20 w-20 -translate-y-1/2 rounded-full bg-white/20 blur-xl" />
+                <div className="absolute right-8 top-6 h-8 w-8 rounded-full bg-white/20" />
+                <div className="absolute inset-x-0 bottom-8 h-px bg-white/30" />
+                <div className="absolute bottom-8 left-4 right-4 h-10 bg-[radial-gradient(circle_at_20%_50%,rgba(255,255,255,0.8),transparent_20%),radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.7),transparent_24%),radial-gradient(circle_at_80%_50%,rgba(255,255,255,0.5),transparent_18%)]" />
               </div>
+            </section>
+          </div>
+        </section>
+
+        <section>
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-green-600 text-sm font-heading font-bold text-white">3</div>
+            <h2 className="text-2xl font-heading font-bold text-text-primary">
+              {lang === 'EN' ? 'Occupation & Workplace / อาชีพและสถานที่ทำงาน' : 'อาชีพและสถานที่ทำงาน'}
+            </h2>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <section className="signup-panel p-6">
+              <label className="signup-label">
+                {lang === 'EN' ? 'Current Occupation / อาชีพปัจจุบัน' : 'อาชีพปัจจุบัน'}
+              </label>
               <input
-                type="file"
-                accept="image/*,.pdf"
-                className="hidden"
-                onChange={(e) => setIdCardFile(e.target.files?.[0]?.name ?? null)}
+                value={occupation}
+                onChange={(event) => setOccupation(event.target.value)}
+                placeholder={lang === 'EN' ? 'Specify your role' : 'ระบุอาชีพ'}
+                className="input-field mt-3"
               />
-            </label>
-          </div>
+              <p className="signup-helper mt-3">
+                {lang === 'EN' ? '* Used for occupational disease risk analysis.' : '* ใช้เพื่อประเมินความเสี่ยงโรคจากการทำงาน'}
+              </p>
+            </section>
 
-          <div className="flex justify-between pt-4">
-            <button type="button" onClick={onBack} className="btn-secondary">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M19 12H5M12 5l-7 7 7 7" />
-              </svg>
-              {lang === 'EN' ? 'Back' : 'ย้อนกลับ'}
-            </button>
-            <button type="submit" className="btn-primary">
-              {lang === 'EN' ? 'Next: Clinical Alerts' : 'ถัดไป: แจ้งเตือนทางคลินิก'}
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </button>
+            <section className="signup-panel p-6">
+              <label className="signup-label">
+                {lang === 'EN' ? 'Workplace / Company Name' : 'สถานที่ทำงาน / ชื่อบริษัท'}
+              </label>
+              <input
+                value={workplace}
+                onChange={(event) => setWorkplace(event.target.value)}
+                placeholder={lang === 'EN' ? 'Company Name' : 'ชื่อบริษัท'}
+                className="input-field mt-3"
+              />
+              <p className="signup-helper mt-3">
+                {lang === 'EN' ? '* Required for corporate billing if applicable.' : '* ใช้ในกรณีต้องออกเอกสารหรือเรียกเก็บกับองค์กร'}
+              </p>
+            </section>
           </div>
-        </form>
+        </section>
       </div>
-    </div>
+    </SignUpShell>
   )
 }

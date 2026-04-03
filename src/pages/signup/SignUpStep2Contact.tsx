@@ -1,164 +1,194 @@
 import { useState } from 'react'
-import { ProgressBar } from '../../components/ui/ProgressBar'
+import SignUpShell from '../../components/signup/SignUpShell'
 
 interface SignUpStep2Props {
   lang: 'EN' | 'TH'
+  onLangChange: (lang: 'EN' | 'TH') => void
   onBack: () => void
   onNext: () => void
 }
 
-const PROVINCES_TH = ['กรุงเทพมหานคร', 'เชียงใหม่', 'นครราชสีมา', 'ขอนแก่น', 'สงขลา', 'ชลบุรี', 'ภูเก็ต']
-const STEPS_EN = ['Personal', 'Contact', 'Emergency', 'Insurance', 'Alerts']
+const PROVINCES = ['Bangkok (กรุงเทพมหานคร)', 'Chiang Mai (เชียงใหม่)', 'Phuket (ภูเก็ต)', 'Khon Kaen (ขอนแก่น)']
+const DISTRICTS = ['Pathum Wan (ปทุมวัน)', 'Bang Rak (บางรัก)', 'Watthana (วัฒนา)', 'Huai Khwang (ห้วยขวาง)']
 
-export default function SignUpStep2Contact({ lang, onBack, onNext }: SignUpStep2Props) {
+export default function SignUpStep2Contact({ lang, onLangChange, onBack, onNext }: SignUpStep2Props) {
   const [phone, setPhone] = useState('')
-  const [email, setEmail] = useState('')
-  const [address, setAddress] = useState('')
-  const [district, setDistrict] = useState('')
-  const [province, setProvince] = useState('')
-  const [postalCode, setPostalCode] = useState('')
-  const [lineId, setLineId] = useState('')
+  const [province, setProvince] = useState(PROVINCES[0])
+  const [district, setDistrict] = useState(DISTRICTS[0])
+  const [registeredAddress, setRegisteredAddress] = useState('')
+  const [currentAddress, setCurrentAddress] = useState('')
+  const [sameAsRegistered, setSameAsRegistered] = useState(false)
+
+  const displayedCurrentAddress = sameAsRegistered ? registeredAddress : currentAddress
 
   return (
-    <div className="min-h-screen bg-surface">
-      <header className="bg-white shadow-header px-8 py-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+    <SignUpShell
+      currentStep={2}
+      lang={lang}
+      onLangChange={onLangChange}
+      title={lang === 'EN' ? 'Contact & Location Data' : 'ข้อมูลติดต่อและที่อยู่'}
+      subtitle={
+        lang === 'EN'
+          ? 'ข้อมูลการติดต่อและที่อยู่ / Contact information and location details.'
+          : 'กรอกข้อมูลการติดต่อและตำแหน่งที่อยู่ของคุณ'
+      }
+      footer={
+        <div className="flex items-center justify-between gap-4">
+          <button onClick={onBack} className="inline-flex items-center gap-2 text-sm font-body text-text-secondary transition-colors hover:text-text-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5" />
+              <path d="M12 19l-7-7 7-7" />
             </svg>
-          </div>
-          <span className="font-heading font-bold text-xl text-primary-dark">Clinical Clarity</span>
+            {lang === 'EN' ? 'Previous' : 'ย้อนกลับ'}
+          </button>
+          <button onClick={onNext} className="btn-primary">
+            {lang === 'EN' ? 'Next Step' : 'ขั้นตอนถัดไป'}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+              <path d="M5 12h14" />
+              <path d="M12 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
-        <ProgressBar current={2} total={5} steps={STEPS_EN} />
-      </header>
-
-      <div className="max-w-2xl mx-auto py-12 px-8">
-        <div className="mb-10">
-          <h1 className="text-4xl font-heading font-bold text-text-primary">
-            {lang === 'EN' ? 'Contact & Location' : 'ข้อมูลติดต่อและที่อยู่'}
-          </h1>
-          <p className="text-lg font-body text-text-secondary mt-2">
-            {lang === 'EN' ? 'Step 2 of 5 — Your contact details' : 'ขั้นตอนที่ 2 จาก 5'}
+      }
+    >
+      <div className="space-y-6">
+        <section className="signup-panel border-l-4 border-l-primary p-6 sm:p-7">
+          <label className="signup-label">
+            {lang === 'EN' ? 'Mobile Phone Number' : 'เบอร์โทรศัพท์มือถือ'}
+          </label>
+          <p className="signup-helper mt-1">
+            {lang === 'EN' ? 'หมายเลขโทรศัพท์ที่ใช้ติดต่อกลับ (สำหรับการแจ้งเตือน SMS/LINE)' : 'เบอร์โทรที่ใช้ติดต่อกลับสำหรับการแจ้งเตือน'}
           </p>
-        </div>
 
-        <form className="flex flex-col gap-6" onSubmit={(e) => { e.preventDefault(); onNext() }}>
-          {/* Phone */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-body text-text-secondary">
-              {lang === 'EN' ? 'Phone Number *' : 'เบอร์โทรศัพท์ *'}
-            </label>
-            <div className="flex gap-2">
-              <div className="input-field w-20 text-center flex items-center justify-center bg-surface-input">
-                <span className="text-base font-body text-text-primary">🇹🇭 +66</span>
+          <div className="mt-5 flex flex-wrap items-center gap-3 rounded-[22px] bg-[#f4f6fa] p-4 sm:flex-nowrap">
+            <div className="inline-flex h-14 items-center gap-2 rounded-2xl bg-white px-4 text-text-primary shadow-sm">
+              <span className="text-lg">+66</span>
+            </div>
+            <input
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              placeholder="08X-XXX-XXXX"
+              className="min-w-[220px] flex-1 bg-transparent text-3xl font-heading font-medium tracking-[0.08em] text-text-primary outline-none placeholder:text-[#c7d0dc]"
+            />
+            <button className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                <path d="M8 9h8" />
+                <path d="M8 13h5" />
+              </svg>
+            </button>
+          </div>
+        </section>
+
+        <div className="grid gap-6 xl:grid-cols-[1.05fr,0.7fr]">
+          <div className="space-y-6">
+            <section className="signup-panel p-6 sm:p-7">
+              <label className="signup-label">
+                {lang === 'EN' ? 'Registered Address' : 'ที่อยู่ตามทะเบียนบ้าน'}
+              </label>
+              <p className="signup-helper mt-1">
+                {lang === 'EN' ? 'ข้อมูลตามทะเบียนบ้าน' : 'กรอกข้อมูลตามทะเบียนบ้าน'}
+              </p>
+              <textarea
+                value={registeredAddress}
+                onChange={(event) => setRegisteredAddress(event.target.value)}
+                placeholder={lang === 'EN' ? 'House No, Street, Sub-district...' : 'บ้านเลขที่ ถนน แขวง/ตำบล...'}
+                className="textarea-field mt-4 min-h-44"
+              />
+            </section>
+
+            <section className="signup-panel p-6 sm:p-7">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <label className="signup-label">
+                    {lang === 'EN' ? 'Current Address' : 'ที่อยู่ปัจจุบัน'}
+                  </label>
+                  <p className="signup-helper mt-1">
+                    {lang === 'EN' ? 'ที่อยู่ที่สามารถติดต่อได้ในขณะนี้' : 'ที่อยู่ที่สามารถติดต่อได้ปัจจุบัน'}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSameAsRegistered((previous) => !previous)
+                    if (!sameAsRegistered) {
+                      setCurrentAddress(registeredAddress)
+                    }
+                  }}
+                  className={`relative inline-flex h-8 w-14 rounded-full transition-colors ${sameAsRegistered ? 'bg-primary' : 'bg-[#d9e1eb]'}`}
+                >
+                  <span
+                    className={`absolute top-1 h-6 w-6 rounded-full bg-white shadow transition-transform ${sameAsRegistered ? 'translate-x-7' : 'translate-x-1'}`}
+                  />
+                </button>
               </div>
-              <input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="08X-XXX-XXXX"
-                className="input-field flex-1"
-                type="tel"
-                required
+
+              <p className="mt-3 text-[11px] font-body font-semibold uppercase tracking-[0.14em] text-text-muted">
+                {lang === 'EN' ? 'Same as Registered' : 'เหมือนทะเบียนบ้าน'}
+              </p>
+              <textarea
+                value={displayedCurrentAddress}
+                onChange={(event) => {
+                  if (!sameAsRegistered) {
+                    setCurrentAddress(event.target.value)
+                  }
+                }}
+                placeholder={lang === 'EN' ? 'Room No, Building, Area...' : 'ห้อง อาคาร หรือพื้นที่ปัจจุบัน...'}
+                disabled={sameAsRegistered}
+                className={`textarea-field mt-4 min-h-36 ${sameAsRegistered ? 'opacity-70' : ''}`}
               />
+            </section>
+          </div>
+
+          <section className="signup-panel p-6 sm:p-7">
+            <label className="signup-label">
+              {lang === 'EN' ? 'Geographic Selection' : 'การเลือกพื้นที่'}
+            </label>
+            <p className="signup-helper mt-1">
+              {lang === 'EN' ? 'การระบุตำแหน่งและพื้นที่ (เพื่อการวิเคราะห์ความหนาแน่น)' : 'ใช้เพื่อระบุตำแหน่งพื้นที่ของผู้ป่วย'}
+            </p>
+
+            <div className="mt-5 space-y-4">
+              <div>
+                <label className="signup-label">{lang === 'EN' ? 'Province / จังหวัด' : 'จังหวัด'}</label>
+                <select value={province} onChange={(event) => setProvince(event.target.value)} className="input-field mt-2">
+                  {PROVINCES.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="signup-label">{lang === 'EN' ? 'District / เขต-อำเภอ' : 'เขต / อำเภอ'}</label>
+                <select value={district} onChange={(event) => setDistrict(event.target.value)} className="input-field mt-2">
+                  {DISTRICTS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-          </div>
 
-          {/* Email */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-body text-text-secondary">
-              {lang === 'EN' ? 'Email Address' : 'อีเมล'}
-            </label>
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="example@email.com"
-              type="email"
-              className="input-field"
-            />
-          </div>
+            <div className="mt-6 overflow-hidden rounded-[24px] bg-gradient-to-br from-[#78c2de] via-[#a4daf0] to-[#d9f4ff] p-4">
+              <div className="relative flex min-h-[250px] items-center justify-center overflow-hidden rounded-[20px] bg-white/20">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.6),transparent_40%),radial-gradient(circle_at_70%_70%,rgba(255,255,255,0.45),transparent_35%)]" />
+                <div className="absolute h-28 w-28 rounded-full border-[16px] border-danger bg-white shadow-[0_12px_30px_rgba(186,26,26,0.18)]" />
+                <div className="absolute top-[58%] h-16 w-16 rotate-45 rounded-2xl bg-danger" />
+                <div className="absolute h-11 w-11 rounded-full bg-white shadow-inner" />
+              </div>
 
-          {/* LINE ID */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-body text-text-secondary">
-              {lang === 'EN' ? 'LINE ID (optional)' : 'ไอดีไลน์ (ถ้ามี)'}
-            </label>
-            <input
-              value={lineId}
-              onChange={(e) => setLineId(e.target.value)}
-              placeholder="@yourlineid"
-              className="input-field"
-            />
-          </div>
-
-          {/* Address */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-body text-text-secondary">
-              {lang === 'EN' ? 'Address *' : 'ที่อยู่ *'}
-            </label>
-            <textarea
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder={lang === 'EN' ? 'House no., Street, Building...' : 'บ้านเลขที่ ถนน อาคาร...'}
-              className="textarea-field min-h-24"
-              required
-            />
-          </div>
-
-          {/* District + Province */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-body text-text-secondary">
-                {lang === 'EN' ? 'District / Subdistrict' : 'เขต/ตำบล'}
-              </label>
-              <input
-                value={district}
-                onChange={(e) => setDistrict(e.target.value)}
-                placeholder={lang === 'EN' ? 'District...' : 'เขต/อำเภอ...'}
-                className="input-field"
-              />
+              <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-[11px] font-body font-semibold uppercase tracking-[0.12em] text-primary shadow-sm">
+                <span className="h-2 w-2 rounded-full bg-primary" />
+                {lang === 'EN' ? 'Location Analysis Active' : 'กำลังวิเคราะห์ตำแหน่ง'}
+              </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-body text-text-secondary">
-                {lang === 'EN' ? 'Province' : 'จังหวัด'}
-              </label>
-              <select value={province} onChange={(e) => setProvince(e.target.value)} className="input-field">
-                <option value="">{lang === 'EN' ? 'Select Province...' : 'เลือกจังหวัด...'}</option>
-                {PROVINCES_TH.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
-            </div>
-          </div>
-
-          {/* Postal code */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-body text-text-secondary">
-              {lang === 'EN' ? 'Postal Code' : 'รหัสไปรษณีย์'}
-            </label>
-            <input
-              value={postalCode}
-              onChange={(e) => setPostalCode(e.target.value)}
-              placeholder="XXXXX"
-              className="input-field w-36"
-              maxLength={5}
-            />
-          </div>
-
-          <div className="flex justify-between pt-4">
-            <button type="button" onClick={onBack} className="btn-secondary">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M19 12H5M12 5l-7 7 7 7" />
-              </svg>
-              {lang === 'EN' ? 'Back' : 'ย้อนกลับ'}
-            </button>
-            <button type="submit" className="btn-primary">
-              {lang === 'EN' ? 'Next: Emergency Contact' : 'ถัดไป: ผู้ติดต่อฉุกเฉิน'}
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
-        </form>
+          </section>
+        </div>
       </div>
-    </div>
+    </SignUpShell>
   )
 }

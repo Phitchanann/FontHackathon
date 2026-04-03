@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { Language } from '../../types/patient'
 import KioskStep1Welcome from './KioskStep1Welcome'
 import KioskStep2Symptoms from './KioskStep2Symptoms'
@@ -14,6 +15,7 @@ export default function KioskPage() {
   const [step, setStep] = useState(0) // 0 = welcome, 1-5 = steps
   const [lang, setLang] = useState<Language>('EN')
   const [done, setDone] = useState(false)
+  const navigate = useNavigate()
 
   function next() {
     setStep((s) => Math.min(s + 1, TOTAL_STEPS))
@@ -56,7 +58,13 @@ export default function KioskPage() {
 
   // Welcome screen (step 0)
   if (step === 0) {
-    return <KioskStep1Welcome lang={lang} onStart={() => setStep(1)} />
+    return (
+      <KioskStep1Welcome
+        lang={lang}
+        onStart={() => navigate('/signup')}
+        onExisting={() => setStep(1)}
+      />
+    )
   }
 
   return (
